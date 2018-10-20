@@ -93,7 +93,7 @@ if [ ! -f "$(realpath -s "${SCRIPTPATH}/application.ini")" ]; then
 fi
 
 # Download resela
-git clone -b production https://gitlab.resela.eu/resela/resela.git ${WEBDIR}
+git clone -b production https://github.com/kafedra-bit/resela-plus.git ${WEBDIR}
 # Copy application.ini
 cp ${SCRIPTPATH}/application.ini ${WEBDIR}/resela/config/application.ini
 # Crete logfile
