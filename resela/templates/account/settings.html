@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% import "macros/modals.html" as modals %}
+
+{% block javascripts %}
+    <script src="{{ url_for('static', filename='js/dynamic_form.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="page-header">
+                <h1>Settings</h1>
+                <p>All the account management will be done from this page.
+                    Currently you can only change your password
+                    on this page.</p>
+                <hr>
+        </div>
+        </div>
+        <div class="row">
+            <button class="btn btn-primary"
+                    data-toggle="modal"
+                    data-target="#change-password">Change password
+            </button>
+        </div>
+    </div>
+
+    {% call modals.render_modal("change-password", "Change password") %}
+        <form action="{{ url_for('edit.user_save') }}" method="post">
+            <div class="modal-body">
+                <label for="old_password" class="control-label">Current
+                    Password</label>
+                <div class="form-group">
+                    <input placeholder="Current password" type="password" autocomplete="off"
+                           name="old_password" class="form-control" required>
+                </div>
+
+                <label for="new_password" class="control-label">New
+                    Password</label>
+                <div class="form-group">
+                    <input placeholder="Enter new password" type="password" autocomplete="off"
+                           name="new_password" class="form-control">
+                </div>
+
+
+                <label for="repeat_password" class="control-label">Confirm
+                    Password</label>
+                <div class="form-group">
+                    <input placeholder="Repeat new password" type="password" autocomplete="off"
+                           name="repeat_password" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" data-dismiss="modal"
+                        aria-hidden="true" type="button">
+                    <i class="fa fa-ban"></i> Close
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-save"></i> Save changes
+                </button>
+            </div>
+        </form>
+    {% endcall %}
+
+{% endblock %}
+

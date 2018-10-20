@@ -1,0 +1,85 @@
+{% extends "layout.html" %}
+
+{% block stylesheets %}
+    <style>
+        .row {
+            width: 100%;
+            display: flex !important;
+        }
+
+        .no-decorater {
+            list-style-type: none;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="page-header">
+                <div hidden id="user_id">{{ user_id }}</div>
+                <h1>User overview</h1>
+
+            </div>
+        </div>
+        <hr>
+        <div class="row" style="padding-block-end: 25px;">
+            <div class="col-4">
+                <img src="{{ url_for('static', filename='images/placeholderProfile.png') }}" class="rounded-circle">
+            </div>
+            <div class="col-8">
+                <ul class="no-decorater">
+                    <li><h2>{{ student.first_name + ' ' + student.last_name }}</h2></li>
+                    <li><strong>Email:</strong> {{ student.email }}</li>
+                    <li><strong>Name:</strong> {{ student.first_name + ' ' + student.last_name }}</li>
+                    <li><strong>VLAN:</strong> {{ student.vlan }}</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="row">
+            <h2>Courses</h2>
+
+            <div class="table">
+                <table class="table">
+                    <thead class="thead">
+                    <tr>
+                        <th>Name</th>
+                        <th>Course code</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% if not courses %}
+                        <tr>
+                            <td>
+                                This student is not in any courses.
+                            </td>
+                        </tr>
+                    {% else %}
+                        {% for course in courses %}
+                            <tr>
+                                <td>{{ course.description }}</td>
+                                <td>{{ course.name }}</td>
+                                <td class="text-right">
+                                    <div class="btn-group" role="group" aria-label="Lab options">
+                                        <a href="{{ url_for('edit.course', course_id=course.id) }}">
+                                            <button class="btn btn-secondary primary"
+                                                    data-toggle="tooltip" data-placement="top"
+                                                    title="Show course">
+                                                <i class="fa fa-eye" aria-hidden="true"></i>
+                                            </button>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+

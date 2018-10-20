@@ -1,0 +1,103 @@
+<!DOCTYPE HTML>
+<!--
+
+ /$$$$$$$  /$$$$$$$$  /$$$$$$  /$$$$$$$$ /$$        /$$$$$$
+| $$__  $$| $$_____/ /$$__  $$| $$_____/| $$       /$$__  $$    /$$
+| $$  \ $$| $$      | $$  \__/| $$      | $$      | $$  \ $$   | $$
+| $$$$$$$/| $$$$$   |  $$$$$$ | $$$$$   | $$      | $$$$$$$$ /$$$$$$$$
+| $$__  $$| $$__/    \____  $$| $$__/   | $$      | $$__  $$|__  $$__/
+| $$  \ $$| $$       /$$  \ $$| $$      | $$      | $$  | $$   | $$
+| $$  | $$| $$$$$$$$|  $$$$$$/| $$$$$$$$| $$$$$$$$| $$  | $$   |__/
+|__/  |__/|________/ \______/ |________/|________/|__/  |__/
+
+
+                        Copyright 2017 Resela
+                        All  rights  reserved
+
+Want to contribute to the development of Resela? Checkout our gitlab
+http://gitlab.resela.eu/resela/resela
+-->
+<html>
+<head>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
+          integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
+          crossorigin="anonymous">
+    <title>{{ error.name }} {{ error.code }}</title>
+    <style>
+        body {
+            background-color: #E0E0E0;
+            color: #666;
+            text-align: center;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            margin: auto;
+            font-size: 14px;
+        }
+
+        p {
+            color: #0275d8;
+            font-size: 18px;
+            font-weight: normal;
+            line-height: 28px;
+        }
+
+        h3 {
+            color: #0275d8;
+            font-size: 35px;
+            font-weight: normal;
+            line-height: 28px;
+        }
+
+        hr {
+            max-width: 800px;
+            margin: 18px auto;
+            border: 0;
+            border-top: 1px solid #EEE;
+            border-bottom: 1px solid white;
+        }
+
+        img {
+            display: block;
+            margin: 40px auto;
+        }
+
+        a {
+            line-height: 100px;
+            font-weight: normal;
+            color: #4A8BEE;
+            font-size: 18px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container vertical-center">
+    <div class="row justify-content-center">
+        <img src="{{ url_for('static', filename='images/resela_logo_transp.png') }}">
+
+        <div class="jumbotron">
+            <h1 class="display-3">{{ error.name }} {{ error.code }}</h1>
+            <hr class="my-4">
+            <p class="lead">
+                {{ error.description }}
+            </p>
+            <a href="javascript:history.back()">Go back</a>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"
+        integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn"
+        crossorigin="anonymous">
+</script>
+
+
+</body>
+</html>
+
+
+

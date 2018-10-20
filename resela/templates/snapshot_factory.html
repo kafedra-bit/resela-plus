@@ -1,0 +1,268 @@
+{% extends "layout.html" %}
+
+{% block javascripts %}
+    <script src="{{ url_for('static', filename='js/dynamic_form.js') }}"></script>
+    <script>
+        $(function () {
+            $('.instance-box').each(function () {
+                $(this).load($(this).data('url'))
+            });
+
+            $('.save-info').click(function () {
+                var u = "{{ url_for('api.snapshot_factory_save') }}";
+                var d = {
+                    'keywords': $('#keywords').val(),
+                    'internet': $('#internet').is(':checked'),
+                    'description': $('#description').val(),
+                    'username': $('#username').val(),
+                    'password': $('#password').val(),
+                    'flavor': $('#flavor').val(),
+                    'name': $('#name').val()
+                };
+                $.post(u, d, function (data) {
+                    if (!data.success) {
+                        alert(data.feedback);
+                    }
+                    else {
+                        if (!data.internet) {
+                            alert(data.feedback);
+                            $('#internet').prop("checked", false);
+                        }
+                        window.location.reload();
+                        $('#flavor>option:eq(0)').prop('selected', true);
+                    }
+                })
+            });
+
+            $('.revert-info').click(function () {
+                if (confirm("Are you sure you want to revert the info to the original info?")) {
+                    var u = "{{ url_for('api.snapshot_factory_revert') }}";
+                    $.post(u, function (data) {
+                        if (!data.success) {
+                            alert(data.feedback);
+                        }
+                        window.location.reload();
+                    })
+                }
+            });
+
+            $('.create-snapshot').click(function () {
+                var u = "{{ url_for('api.snapshot_factory_create_snapshot') }}";
+                $.post(u, function (data) {
+                    if (data.success) {
+                        window.location.href = data.redirect;
+                    }
+                    else {
+                        alert(data.feedback);
+                    }
+                })
+            });
+
+            $('.delete-snapshot').click(function () {
+                if (confirm("Are you sure you want to delete the current snapshot from the " +
+                        "snapshot factory?")) {
+                    var u = "{{ url_for('api.snapshot_factory_delete') }}";
+                    $.post(u, function (data) {
+                        if (!data.success) {
+                            alert(data.feedback);
+                        }
+                        window.location.reload();
+                    })
+                }
+            });
+
+            $('.create-instance').click(function () {
+                var u = "{{ url_for('api.snapshot_factory_create_instance') }}";
+                $('.loading').show();
+                $.post(u, function (data) {
+                    if (!data.success) {
+                        alert(data.feedback);
+                    }
+                    $('.loading').hide();
+                    window.location.reload()
+                })
+            });
+
+        });
+    </script>
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .loading {
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.35);
+            color: white;
+            display: none;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {% if snapshot_factory.base_img != '' %}
+        <div class="container">
+            <h1>Snapshot factory <small class="text-danger">BETA: Might work, on error try again</small></h1>
+            <p>Create a snapshot from an image in the snapshot library!</p>
+
+            <div class="form-group">
+                <h4><b>Operating system</b></h4>
+                <h6>{{ snapshot_factory.os }}</h6>
+                <h4><b>Version</b></h4>
+                <h6>{{ snapshot_factory.version }}</h6>
+            </div>
+
+            <div class="form-group" id="snapshot-name">
+                <label for="snapshot-name" class="col-form-label">
+                    <b>Edit the snapshot name</b>
+                </label>
+                <input id="name" class="form-control" type="text"
+                       value="{{ snapshot_factory.img_name}}" name="name" required>
+            </div>
+
+            <div class="form-group" id="snapshot-description">
+                <label for="snapshot-description" class="col-form-label">
+                    <b>Edit the description for your snapshot</b>
+                </label>
+                <textarea id="description" class="form-control" rows="3" name="description"
+                          required>{{ snapshot_factory.description }}</textarea>
+            </div>
+
+            <div class="form-group" id="snapshot-keywords">
+                <label for="snapshot-keywords" class="col-form-label">
+                    <b>Edit keywords for your snapshot separated by comma (,)</b>
+                </label>
+                <input id="keywords" class="form-control" type="text" value="{{ snapshot_factory.keywords }}"
+                       name="keywords" data-role="tagsinput" required>
+            </div>
+
+            <div class="form-group">
+                <label class="col-form-label">
+                    <b>Username for the snapshot</b>
+                </label>
+                <input id="username" class="form-control" type="text"
+                       value="{{ snapshot_factory.username }}"
+                       name="username">
+
+                <label class="col-form-label">
+                    <b>Password for the snapshot</b>
+                </label>
+                <input id="password" class="form-control" type="text"
+                       value="{{ snapshot_factory.password }}"
+                       name="password">
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <b>Current flavor:</b>
+                </label>
+                <h6>{{ current_flavor.name.split('.')[1]|capitalize }} -
+                    RAM: {{ current_flavor.ram }}MB, CPU: {{ current_flavor.vcpus }},
+                    DISK: {{ current_flavor.disk }}GB</h6>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <b>Change flavor:</b>
+                </label><br>
+                <select id="flavor" name="flavor">
+                    <option value="">No flavor change</option>
+                    {% for flavor in flavors %}
+                        <option value="{{ flavor.name }}">{{ flavor.name.split('.')[1]|capitalize }} -
+                            RAM: {{ flavor.ram }}MB, CPU: {{ flavor.vcpus }},
+                            DISK: {{ flavor.disk }}GB
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group checkbox">
+                <label>
+                    {% if snapshot_factory.internet == 'True' %}
+                        <input id="internet" type="checkbox" name="internet" value="True" checked>
+                    {% else %}
+                        <input id="internet" type="checkbox" name="internet">
+                    {% endif %}
+                    Has internet access
+                </label>
+            </div>
+
+            <div class="form-group form-inline">
+                <button class="btn btn-primary save-info"  data-toggle="tooltip"
+                       data-placement="bottom" title="Save current information to snapshot">
+                    <i class="fa fa-floppy-o" aria-hidden="true"></i>
+                    Save info
+                </button>
+
+                <button class="btn btn-warning revert-info"  data-toggle="tooltip"
+                       data-placement="bottom" title="Reset all information">
+                    <i class="fa fa-undo" aria-hidden="true"></i>
+                    Revert info
+                </button>
+            </div>
+
+            <div class="form-group" style="position: relative">
+                <div class="loading">
+                    <div class="d-block text-center">
+                        <h5>Working...</h5>
+                        <i class="fa fa-spinner fa-pulse fa-fw"></i>
+                    </div>
+                </div>
+
+                <h3>Snapshot instance</h3>
+                <h6>Here's the instance that the snapshot is create from</h6>
+
+                <div>
+                    {% if instance %}
+                        <div class="instance-box"
+                             data-id="{{ instance.id }}"
+                             data-lab-id="{{ snapshot_factory.id }}"
+                             data-url="{{ url_for('api.instance_box', instance_id=instance.id) }}">
+                            Loading..
+                        </div>
+                    {% else %}
+                        <div class="form-group">
+                            <h6>No instance available</h6>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary create-instance" data-toggle="tooltip"
+                                    data-placement="bottom"
+                                    title="Create this instance">Create
+                                instance</button>
+                        </div>
+                    {% endif %}
+                 </div>
+            </div>
+
+
+            <div class="form-group form-inline">
+                <button class="btn btn-success create-snapshot" data-toggle="tooltip"
+                       data-placement="bottom" title="Create snapshot now">
+                    <i class="fa fa-camera-retro" aria-hidden="true" ></i> Create snapshot
+                </button>
+
+                <button class="btn btn-danger delete-snapshot"  data-toggle="tooltip"
+                       data-placement="bottom" title="Delete unfinished snapshot">
+                    <i class="fa fa-trash" aria-hidden="true"></i> Delete
+                    snapshot
+                </button>
+            </div>
+        </div>
+    {% else %}
+        <div class="jumbotron">
+            <h1 class="display-3">Stop!</h1>
+            <p class="lead">You have not assigned an image to the snapshot factory yet!</p>
+            <hr class="my-4">
+            <p>To assign an image to the snapshot factory navigate to the image library or click
+                on the button below.
+            </p>
+            <p class="lead">
+                <a class="btn btn-primary btn-lg" href="{{ url_for('admin.image_library') }}"
+                   role="button"> Go to image library</a>
+            </p>
+        </div>
+    {% endif %}
+
+{% endblock %}

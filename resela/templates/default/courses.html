@@ -1,0 +1,281 @@
+{% extends "layout.html" %}
+{% import "macros/modals.html" as modals %}
+
+{% block javascripts %}
+    <script src="{{ url_for('static', filename='js/dynamic_form.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-expander/1.7.0/jquery.expander.min.js"></script>
+    <script>
+        $(function () {
+
+            // Course collapse labs
+            $('.course-name').click(function () {
+                $(this).siblings('.labs-wrapper').slideToggle();
+            });
+
+            // Description expander
+            $('.description p').expander();
+
+            // Set modal specific values
+            $('#create-new-lab-modal').on('show.bs.modal', function (event) {
+                $('#create-new-lab-modal form input[name="course_id"]')
+                    .val($(event.relatedTarget).data('course-id'))
+            });
+            $('#delete-lab-modal').on('show.bs.modal', function (event) {
+                $('#delete-lab-modal form input[name="course_id"]')
+                    .val($(event.relatedTarget).data('course-id'));
+                $('#delete-lab-modal form input[name="lab_id"]')
+                    .val($(event.relatedTarget).data('lab-id'));
+            });
+            $('#delete-course-modal').on('show.bs.modal', function (event) {
+                $('#delete-course-modal form input[name="course_id"]')
+                    .val($(event.relatedTarget).data('course-id'));
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .lab-name {
+            width: 200px;
+        }
+
+        table {
+            margin-bottom: 0;
+        }
+
+        .table td {
+            padding: 0.4em;
+            line-height: 2.5em;
+        }
+
+        th {
+            font-size: 1.1em;
+            padding: 1em 0 !important;
+            border-top: none !important;
+        }
+
+        .list-group-item {
+            padding: 0;
+        }
+
+        .course-name {
+            padding: 1em;
+            margin: 0;
+        }
+
+        .course-name:hover {
+            cursor: pointer;
+            background-color: rgba(0,0,0,0.01);
+        }
+
+        .labs-wrapper {
+            display: none;
+            padding: 2em;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            background: rgba(0, 0, 0, 0.01);
+        }
+
+        .list-group-item > .btn-group {
+            margin: 1.25em 1.25em 0 0;
+        }
+
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <h1>
+            Courses and Labs
+            {% if current_user.role == 'admin' %}
+                <button class="btn btn-primary pull-right" data-toggle="modal"
+                        data-target="#create-new-course-modal">
+                    <i class="fa fa-plus" aria-hidden="true"></i> Create course
+                </button>
+            {% endif %}
+        </h1>
+        <hr>
+    </div>
+
+    {% for course in courses %}
+        <li class="row list-group-item">
+            <div class="btn-group pull-right" role="group" aria-label="Course options">
+                <button type="button" class="btn btn-secondary"
+                        data-toggle="tooltip" data-placement="top"
+                        title="Number of labs in course">
+                    <small>{{ course.labs|length }}</small>
+                    <i class="fa fa-flask"></i>
+                </button>
+                {% if current_user.role in ('admin', 'teacher') %}
+                    <button type="button" class="btn btn-secondary primary"
+                            data-url="{{ url_for('edit.course', course_id=course.id) }}"
+                            data-toggle="tooltip" data-placement="top"
+                            title="Edit course">
+                        <i class="fa fa-pencil"></i>
+                    </button>
+                    {% if current_user.role == 'admin' %}
+                        <button class="btn btn-secondary danger"
+                                data-toggle="modal"
+                                data-course-id="{{ course.id }}"
+                                data-target="#delete-course-modal"
+                                data-tooltip="tooltip"
+                                data-placement="top"
+                                title="Remove course">
+                            <i class="fa fa-trash" aria-hidden="true"></i>
+                        </button>
+                    {% endif %}
+                {% endif %}
+            </div>
+            <h4 class="course-name">
+                {{ course.name|lower|capitalize|truncate(40) }}
+                <small>{{ course.code|truncate(30) }}</small>
+            </h4>
+
+            <div class="labs-wrapper">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th class="lab-name">Name</th>
+                        <th>Description</th>
+                        <th>
+                            {% if current_user.role in ('admin', 'teacher') %}
+                                <button class="btn btn-primary pull-right"
+                                        data-course-id="{{ course.id }}"
+                                        data-toggle="modal"
+                                        data-target="#create-new-lab-modal">
+                                    <i class="fa fa-plus"></i> Create lab
+                                </button>
+                            {% endif %}
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for lab in course.labs %}
+                        <tr>
+                            <td class="lab-name">
+                                <strong>
+                                    {{ lab.name.rsplit("|", 1)[1]|lower|capitalize|truncate(30) }}
+                                </strong>
+                            </td>
+                            <td class="description">
+                                <p>
+                                    {{ lab.description }}
+                                </p>
+                            </td>
+                            <td class="text-right">
+                                <div class="btn-group" role="group" aria-label="Lab options">
+                                    <button class="btn btn-secondary"
+                                            data-url="{{ url_for('default.lab', lab_id=lab.id) }}">
+                                        <i class="fa fa-sign-in"></i> Go to lab
+                                    </button>
+                                    {% if current_user.role in ('admin', 'teacher') %}
+                                        <button class="btn btn-secondary danger"
+                                                data-toggle="modal"
+                                                data-lab-id="{{ lab.id }}"
+                                                data-course-id="{{ course.id }}"
+                                                data-target="#delete-lab-modal"
+                                                data-tooltip="tooltip"
+                                                data-placement="top"
+                                                title="Remove lab">
+                                            <i class="fa fa-trash" aria-hidden="true"></i>
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td><p>No labs for this course</p></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </li>
+    {% endfor %}
+
+    {# Delete lab confirm modal #}
+    {% call modals.render_danger_modal("delete-lab-modal", "Warning", "exclamation-triangle") %}
+        <p>Are you sure you want to remove this lab from the course?</p>
+        <form action="{{ url_for('api.lab_delete') }}" method="post">
+            <input type="hidden" name="lab_id" value="">
+            <input type="hidden" name="course_id" value="">
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fa fa-check" aria-hidden="true"></i> Confirm
+                </button>
+            </div>
+        </form>
+    {% endcall %}
+
+    {# Delete course confirm modal #}
+    {% call modals.render_danger_modal("delete-course-modal", "Warning", "exclamation-triangle") %}
+        <p>Are you sure you want to remove this course?</p>
+        <form action="{{ url_for('api.course_delete') }}" method="post">
+            <input type="hidden" name="course_id" value="">
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fa fa-check" aria-hidden="true"></i> Confirm
+                </button>
+            </div>
+        </form>
+    {% endcall %}
+
+    {# Create lab modal #}
+    {% call modals.render_modal("create-new-lab-modal", "Create new lab") %}
+        <form action="{{ url_for('api.lab_create') }}" method="post">
+            <input type="hidden" name="course_id" value="">
+            <p>
+                Input name for the new lab.
+            </p>
+            <div class="form-group" id="keyword-select">
+                <input placeholder="Enter lab name" class="form-control" type="text"
+                       name="lab_title" required>
+            </div>
+            <div class="form-group">
+                <textarea placeholder="Enter lab description" class="form-control"
+                          name="description" required></textarea>
+            </div>
+
+            <div class="form-group" id="internet-select">
+                <label class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input"
+                           value="True" name="lab_internet">
+                    <span class="custom-control-indicator"></span>
+                    <span class="custom-control-description">Has internet access</span>
+                </label>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-check" aria-hidden="true"></i> Confirm
+                </button>
+            </div>
+        </form>
+    {% endcall %}
+
+    {# Add course modal #}
+    {% if current_user.role == 'admin' %}
+        {% call modals.render_modal("create-new-course-modal", "Create new course") %}
+            <form action="{{ url_for('api.course_create') }}" method="post">
+                <div class="form-group">
+                    <input class="form-control" type="text" name="course_title"
+                           placeholder="Course name" required>
+                </div>
+                <div class="form-group">
+                    <input class="form-control" type="text" name="course_code"
+                           placeholder="Course code"
+                           required>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-check" aria-hidden="true"></i> Create course
+                </button>
+            </form>
+        {% endcall %}
+    {% endif %}
+
+{% endblock %}
+

@@ -1,0 +1,217 @@
+{% extends "layout.html" %}
+{% import "macros/modals.html" as modals %}
+
+{% block javascripts %}
+    <script src="{{ url_for('static', filename='js/dynamic_form.js') }}"></script>
+    <script>
+        {% if current_user.role in ('admin', 'teacher') %}
+            $('#remove-image-modal').on('show.bs.modal', function (event) {
+                $('#remove-image-modal form input[name="image_id"]')
+                    .val($(event.relatedTarget).data('image-id'));
+            });
+        {% endif %}
+
+        $('#remove-instance-modal').on('show.bs.modal', function (event) {
+            $('#remove-instance-modal form input[name="instance_id"]')
+                .val($(event.relatedTarget).data('instance-id'));
+        });
+
+        $('.instance-box').each(function () {
+            $(this).load($(this).data('url'))
+        });
+
+        $('#create_instance').click(function () {
+            var e = $(this);
+            var u = '{{ url_for('api.lab_launch') }}';
+            var d = {
+                lab_id: '{{ lab.id }}'
+            };
+
+            // Set button loading state
+            e.addClass('disabled');
+
+            $.post(u, d, function (data) {
+                if (data.success) {
+                    // Render lab boxes
+                    window.location.reload(); // For now...
+                } else {
+                    flash(data.feedback);
+                }
+
+                // Reset button state
+                e.removeClass('disabled');
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <h1>Lab overview for:
+            <small class="text-muted">{{ lab.name.split("|", 1)[1] }}
+                {% if current_user.role in ('admin','teacher') %}
+                    <button class="btn btn-secondary" data-toggle="modal"
+                            data-target="#modal-edit-description">
+                        <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                        Edit
+                    </button>
+                {% endif %}
+            </small>
+        </h1>
+        <hr>
+    </div>
+
+    <div class="row">
+        <h4>Description</h4>
+        <div class="card">
+            <div class="card-block">
+                <p id="description_textarea">{{ lab.description }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <br>
+        {% if lab.internet %}
+            <h5 class="text-success">Internet connected</h5>
+        {% else %}
+            <h5 class="text-danger">Internet disconnected</h5>
+        {% endif %}
+        <hr>
+        <h2>Instances</h2>
+        {% for instance in lab.instances %}
+            <div class="instance-box"
+                 data-id="{{ instance.id }}"
+                 data-lab-id="{{ lab.id }}"
+                 data-url="{{ url_for('api.instance_box', instance_id=instance.id) }}">
+                Loading..
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="row">
+        <hr>
+        <h2>Lab images
+            {% if current_user.role in ('teacher') %}
+                <a href="{{ url_for('admin.image_library') }}" class="btn btn-secondary"
+                    data-toggle="tooltip" data-position="top" title="Add image to lab">
+                    <i class="fa fa-folder" aria-hidden="true"></i>
+                </a>
+            {% endif %}
+        </h2>
+        <div class="table">
+            <table class="table">
+                <thead class="thead">
+                <tr>
+                    <th>Image name</th>
+                    <th><b>#</b></th>
+                    <th>OS</th>
+                    <th>Version</th>
+                    {% if current_user.role in ('admin','teacher') %}
+                        <th>Flavor</th>
+                        <th>Internet</th>
+                        <th>Size</th>
+                    {% endif %}
+                    <th>
+                        {% if current_user.role in ('teacher','student') %}
+                        <div class="text-right">
+                            <button class="btn btn-secondary" id="create_instance">
+                                <i class="fa fa-rocket"></i> Launch lab
+                            </button>
+                        </div>
+                        {% endif %}
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for image, image_amount in image_descriptors %}
+                    <tr>
+                        <td>{{ image.name.split("|")[2]|truncate(18) }}</td>
+                        <td>{{ image_amount }}</td>
+                        <td>{{ image.os }}</td>
+                        <td>{{ image.version }}</td>
+                        {% if current_user.role in ('admin','teacher') %}
+                            <td>{{ image.flavor_name }}</td>
+                            <td>
+                                {% if image.internet == 'True' %}
+                                    <strong class="text-success">Yes</strong>
+                                {% else %}
+                                    <strong class="text-danger">No</strong>
+                                {% endif %}
+                            </td>
+                            <td>{{ image.size|filesizeformat }}</td>
+                            <td class="text-right">
+                                <div class="btn-group" role="group" aria-label="Lab options">
+                                    <button class="btn btn-secondary danger"
+                                            data-image-id="{{ image.id }}"
+                                            data-toggle="modal"
+                                            data-target="#remove-image-modal"
+                                            data-tooltip="tooltip"
+                                            data-placement="top"
+                                            title="Remove image">
+                                        <i class="fa fa-trash" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% if current_user.role in ('admin', 'teacher') %}
+
+        {# Remove instance confirm modal #}
+        {% call modals.render_danger_modal("remove-instance-modal", "Warning", "exclamation-triangle") %}
+            <p>Are you sure you want to remove instance?</p>
+            <form action="{{ url_for('api.instance_delete') }}" method="post">
+                <input type="hidden" name="lab_id" value="{{ lab.id }}">
+                <input type="hidden" name="instance_id" value="">
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fa fa-check" aria-hidden="true"></i> Confirm
+                    </button>
+                </div>
+            </form>
+        {% endcall %}
+
+
+        {# Remove image confirm modal #}
+        {% call modals.render_danger_modal("remove-image-modal", "Warning", "exclamation-triangle") %}
+            <p>Are you sure you want to remove this image from the lab?</p>
+            <form action="{{ url_for('api.lab_remove_image') }}" method="post">
+                <input type="hidden" name="lab_id" value="{{ lab.id }}">
+                <input type="hidden" name="image_id" value="">
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fa fa-check" aria-hidden="true"></i> Confirm
+                    </button>
+                </div>
+            </form>
+        {% endcall %}
+
+        {# Edit lab modal #}
+        {% call modals.render_modal("modal-edit-description", "Edit lab description") %}
+            <form action="{{ url_for('api.lab_save') }}" method="post">
+                <input type="hidden" name="lab_id" value="{{ lab.id }}">
+                <input type="hidden" name="lab_title" value="{{ lab.name.split("|", 1)[1] }}">
+                <div class="form-group" id="description-select">
+                    <label for="description-select" class="col-form-label">
+                        <b>Give a description of the lab.</b>
+                    </label>
+                    <textarea class="form-control" rows="3" name="lab_description">{{ lab.description }}</textarea>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fa fa-floppy-o" aria-hidden="true"></i>
+                        Save
+                    </button>
+                </div>
+            </form>
+        {% endcall %}
+    {% endif %}
+
+{% endblock %}
+
+

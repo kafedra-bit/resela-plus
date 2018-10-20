@@ -1,0 +1,161 @@
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    font-size: 15px;
+    padding-bottom: 2em;
+}
+
+.footer {
+    background-color: #292b2c;
+    color: white;
+    height: 10em;
+    width: 100%;
+    padding: 2em;
+    text-align: justify;
+    font-size: 0.8em;
+    bottom: 0;
+    position: absolute;
+    margin-bottom: -120px;
+}
+
+.row {
+    display: block;
+}
+
+.flex-row {
+    display: flex;
+}
+
+.alert-text {
+    margin-left: 1em;
+}
+
+.vertical-center {
+    min-height: 100%; /* Fallback for browsers do NOT support vh unit */
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
+.navbar.fixed-top {
+    position: relative !important;
+}
+
+.no-padding {
+    padding: 0 !important;
+}
+
+.no-margin {
+    margin: 0 !important;
+}
+
+.padding-card {
+    padding: 10px;
+    margin-bottom: 1em;
+}
+
+.card-outline-secondary {
+    background-color: rgb(250, 250, 250);
+    border-color: #cacaca !important;
+}
+
+.default-cursor:hover {
+    cursor: default !important;
+}
+
+.btn-group button i.fa {
+    padding-right: inherit;
+}
+button i.fa {
+    margin-left: -0.5em;
+    margin-right: 0.2em;
+    font-size: 0.9em;
+}
+
+/* === SIDEBAR === */
+.sidebar-border {
+    border-right: 1px solid #ccc;
+}
+
+.sidebar {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1030;
+    display: block;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: #fff;
+    text-align: center;
+}
+
+.sidebar h3 {
+    padding-top: 1rem;
+}
+
+.sidebar i.fa {
+    float: left;
+    padding-right: 1em;
+    width: 2em;
+    line-height: 1.5em;
+
+}
+
+.sidebar a {
+    display: block;
+    width: 100%;
+    padding: 1em 1em;
+    text-align: left;
+    color: #292b2c;
+}
+
+.sidebar a:hover {
+    background: #292b2c;
+    text-decoration: none;
+    color: white;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+}
+/* ============= */
+
+.cookie-notice {
+    padding-top: 1em;
+}
+
+.content {
+    padding-top: 3em;
+}
+
+.input-group-addon {
+    width: 2.5em;
+}
+
+.btn-group .btn .fa {
+    width: 1em;
+    left: 0.5em;
+    position: relative;
+}
+
+.btn-group .btn.primary:hover {
+    color: #0275d8;
+}
+
+.btn-group .btn.danger:hover {
+    color: #d9534f;
+}
+
+.progress-bar-modal {
+    height: 1px;
+}
+
+
+.modal_warning {
+    background-color: #d9534f !important;
+    color: white;
+}
+
+.modal_warning button {
+    color: white;
+}

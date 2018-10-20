@@ -1,0 +1,157 @@
+<!DOCTYPE HTML>
+<!--
+
+ /$$$$$$$  /$$$$$$$$  /$$$$$$  /$$$$$$$$ /$$        /$$$$$$
+| $$__  $$| $$_____/ /$$__  $$| $$_____/| $$       /$$__  $$    /$$
+| $$  \ $$| $$      | $$  \__/| $$      | $$      | $$  \ $$   | $$
+| $$$$$$$/| $$$$$   |  $$$$$$ | $$$$$   | $$      | $$$$$$$$ /$$$$$$$$
+| $$__  $$| $$__/    \____  $$| $$__/   | $$      | $$__  $$|__  $$__/
+| $$  \ $$| $$       /$$  \ $$| $$      | $$      | $$  | $$   | $$
+| $$  | $$| $$$$$$$$|  $$$$$$/| $$$$$$$$| $$$$$$$$| $$  | $$   |__/
+|__/  |__/|________/ \______/ |________/|________/|__/  |__/
+
+
+                        Copyright 2017 Resela
+                        All  rights  reserved
+
+Want to contribute to the development of Resela? Checkout our gitlab
+http://gitlab.resela.eu/resela/resela
+-->
+<html>
+<head>
+    <title>RESELA+</title>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="description" content="Resela is a remote security lab application for
+        cybersecurity education."/>
+    <meta name="keywords" content="security, labs, openstack, education, cybersecurity"/>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="ReSeLa+ The Remote Security Lab">
+    <meta property="og:image"
+          content="{{ url_for('static', filename='images/resela_logo_transp.png') }}">
+    <meta property="og:image"
+          content="{{ url_for('static', filename='images/resela_logo_transp.png') }}">
+
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
+          integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
+          crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tagsinput.css') }}">
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,300italic,400italic">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+
+{% block body %}
+
+    {% if not g.cookies_accepted %}
+        <div class="bg-warning cookie-notice">
+            <div class="container">
+                <div class="row flex-row">
+                    <p class="text-center">
+                        <button type="button" class="close cookie-accept" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        When you access this website we send you an encrypted session cookie. A session
+                        cookie is a temporary cookie that only remains in the cookie file of your
+                        browser until you leave the site. This cookie is used to validate your access
+                        to different parts of the site. You will not be able to login if you choose
+                        to disable cookies.
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="container-fluid no-padding">
+
+        {% include 'topmenu.html' %}
+
+        <div class="row flex-row no-margin ">
+
+            <div class="col-md-3 col-lg-2 sidebar-border">
+                {% include 'sidemenu.html' %}
+            </div>
+
+            <div class="col-md-9 col-lg-10">
+                <div class="container content">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class="row">
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }}">
+
+                                        <button type="button" class="close" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+
+                                        <h5 class="card-title">
+                                            {% if category == 'info' %}
+                                                <i class="fa fa-info-circle"
+                                                   aria-hidden="true"></i>
+                                            {% elif category == 'success' %}
+                                                <i class="fa fa-check-circle"
+                                                   aria-hidden="true"></i>
+                                            {% elif category == 'warning' %}
+                                                <i class="fa fa-exclamation-triangle"
+                                                   aria-hidden="true"></i>
+                                            {% elif category == 'danger' %}
+                                                <i class="fa fa-times-circle"
+                                                   aria-hidden="true"></i>
+                                            {% endif %}
+
+                                            {{ category|capitalize }}
+                                        </h5>
+
+                                        <hr>
+                                        <p class="alert-text">
+                                            {{ message }}
+                                        </p>
+
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block footer %}
+    {% include 'footer.html' %}
+{% endblock %}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="{{ url_for('static', filename='js/tagsinput.js') }}"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"
+        integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn"
+        crossorigin="anonymous"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+{% if not g.cookies_accepted %}
+        <script src="{{ url_for('static', filename='js/cookie.js') }}"></script>
+        <script>
+            $('.cookie-accept').click(function(e){
+                e.preventDefault();
+                Cookies.set('cookies', 'accepted');
+                $('.cookie-notice').slideUp();
+            });
+        </script>
+{% endif %}
+{% block javascripts %}{% endblock %}
+
+</body>
+</html>

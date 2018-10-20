@@ -1,0 +1,227 @@
+{% extends "layout.html" %}
+
+{% block javascripts %}
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
+    <script>
+        function render_donut(target_id, size, labels, values, colors){
+            var data = [{
+               values: values,
+                labels: labels,
+                type: 'pie',
+                hole: 0.4,
+                hoverinfo: 'skip',
+                marker: {
+                   colors: colors
+                },
+                sort: false
+            }];
+            var layout = {
+                height: size,
+                width: size
+            };
+            Plotly.newPlot(target_id, data, layout);
+        }
+
+        {% if current_user.role == 'admin' %}
+            render_donut('system_ram', 300, ['Used', 'Free'],
+                [{{ system_wide_stats['ram']['used'] }},
+                {{ system_wide_stats['ram']['total'] -
+                    system_wide_stats['ram']['used'] }}], ['rgb(0,109,204)', 'rgb(189,189,189)']);
+
+            render_donut('system_vcpu', 300, ['Used', 'Free'],
+                    [{{ system_wide_stats['vcpu']['used'] }},
+                    {{ system_wide_stats['vcpu']['total'] -
+                    system_wide_stats['vcpu']['used'] }}], ['rgb(0,109,204)', 'rgb(189,189,189)']);
+
+            render_donut('system_disk', 300, ['Used', 'Free'],
+                    [{{ system_wide_stats['disk']['used'] }},
+                    {{ system_wide_stats['disk']['total'] -
+                    system_wide_stats['disk']['used'] }}], ['rgb(0,109,204)', 'rgb(189,189,189)']);
+        {% endif %}
+        {% if current_user.role == 'teacher' %}
+            render_donut('instances', 300, ['Active', 'Other'],
+                    [{{ inst_active }},
+                    {{ inst_total - inst_active }}], ['rgb(0,109,204)', 'rgb(189,189,189)']);
+            render_donut('labs', 300, ['Active', 'Other'],
+                    [{{ labs_active }},
+                    {{ labs_total - labs_active }}], ['rgb(0,109,204)', 'rgb(189,189,189)']);
+        {% endif %}
+
+    </script>
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .donut {
+                margin: auto;
+                width: 300px;
+                height: 300px;
+            }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col">
+            <h1>Welcome to Resela</h1>
+            <hr>
+            {% if current_user.role == 'admin' %}
+                <h2>System wide stats: <small>{{ system_wide_stats['vms'] }} running vms</small></h2>
+                <div class="row flex-row">
+                    <div class="col-4">
+                        <h4 align="center">RAM: <small>
+                            {{ system_wide_stats['ram']['used'] }} /
+                            {{ system_wide_stats['ram']['total'] }} GB
+                        </small></h4>
+                        <div id="system_ram" class="donut"></div>
+                    </div>
+                    <div class="col-4">
+                        <h4 align="center">VCPUs (Cores): <small>
+                            {{ system_wide_stats['vcpu']['used'] }} /
+                            {{ system_wide_stats['vcpu']['total'] }}
+                        </small></h4>
+                        <div id="system_vcpu" class="donut"></div>
+                    </div>
+                    <div class="col-4">
+                        <h4 align="center">Disk: <small>
+                            {{ system_wide_stats['disk']['used'] }} /
+                            {{ system_wide_stats['disk']['total'] }} GB
+                        </small></h4>
+                        <div id="system_disk" class="donut"></div>
+                    </div>
+                </div>
+                <h2>Compute node stats: <small>{{ hypervisors|length }} active nodes</small></h2>
+                <div class="row flex-row">
+                    <div class="col">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <td>Hostname</td>
+                                    <td>RAM (GB)</td>
+                                    <td>CPU (Cores)</td>
+                                    <td>Disk (GB)</td>
+                                    <td>Running VMs</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for hypervisor in hypervisors %}
+                                    <tr>
+                                        <td>{{ hypervisor.hypervisor_hostname }}</td>
+                                        <td>{{ (hypervisor.memory_mb_used/1024)|round(2) }} / {{
+                                                (hypervisor.memory_mb/1024)|round(2) }}</td>
+                                        <td>{{ hypervisor.vcpus_used }} / {{ hypervisor.vcpus }}</td>
+                                        <td>{{ hypervisor.local_gb_used }} / {{ hypervisor.local_gb }}</td>
+                                        <td>{{ hypervisor.running_vms }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <h2>Image library stats: <small>{{
+                        libraries['default']['number'] + libraries['snapshots']['number'] +
+                        libraries['images']['number'] }} images in total</small></h2>
+                <div class="row flex-row">
+                    <div class="col">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <td>Library</td>
+                                    <td>Number of images</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for library in libraries %}
+                                    <tr>
+                                        <td>{{ library }}</td>
+                                        <td>{{ libraries[library]['number'] }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+            {% if current_user.role == 'teacher' %}
+            <h2>Status of courses:</h2>
+            <div class="row flex-row">
+                <div class="col-6">
+                    <h4 align="center">Active labs: <small>
+                            {{ labs_active }} /
+                            {{ labs_total }}
+                        </small></h4>
+                    <div id="labs" class="donut"></div>
+                </div>
+                <div class="col-6">
+                    <h4 align="center">Active instances: <small>
+                            {{ inst_active }} /
+                            {{ inst_total }}
+                        </small></h4>
+                        <div id="instances" class="donut"></div>
+                </div>
+            </div>
+            <h2>Courses: </h2>
+                <div class="row flex-row">
+                    <div class="col">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <td>Course code</td>
+                                    <td>Total number of labs</td>
+                                    <td>Active labs</td>
+                                    <td>Active instances</td>
+                                    <td>Suspended instances</td>
+                                    <td>Shutdown instances</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for course in courses %}
+                                    <tr>
+                                        <td>{{ course.name }}</td>
+                                        <td>{{ course.labs|length }}</td>
+                                        <td>{{ course.labs_active }}</td>
+                                        <td>{{ course.inst_active }}</td>
+                                        <td>{{ course.inst_suspended }}</td>
+                                        <td>{{ course.inst_shutdown }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif%}
+            {% if current_user.role == 'student' %}
+                <h2>Your courses</h2>
+                <div class="row flex-row">
+                    <div class="col">
+                        <table class="table">
+                            <thead>
+                                <th>Course code</th>
+                                <th>Number of labs</th>
+                                <th>Active instances</th>
+                                <th>Suspended instances</th>
+                                <th>Shutoff instances</th>
+                                <th>Error instances</th>
+                            </thead>
+                            <tbody>
+                            {% for course in courses %}
+                                <tr>
+                                    <td>{{ course.name }}</td>
+                                    <td>{{ course.labs|length }}</td>
+                                    <td>{{ course.qty_active }}</td>
+                                    <td>{{ course.qty_suspended }}</td>
+                                    <td>{{ course.qty_shutoff }}</td>
+                                    <td>{{ course.qty_error }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+{% endblock %}
+

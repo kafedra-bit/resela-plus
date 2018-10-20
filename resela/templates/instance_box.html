@@ -1,0 +1,137 @@
+{% import "macros/modals.html" as modals %}
+
+<div class="card padding-card {% if instance.is_owner %}card-outline-success{% else %}card-outline-secondary{% endif %}">
+    <div class="instance_container">
+        <div hidden class="id">{{ instance.id }}</div>
+
+        <h4>{{ instance.metadata['image_name'] }}
+            <small>{{ instance.owner }}</small>
+            {% if instance.status == 'ACTIVE' %}
+                <span class="badge badge-success">
+            {% elif instance.status == 'BUILD' %}
+                <span class="badge badge-info">
+            {% elif instance.status == 'SUSPENDED' %}
+                <span class="badge badge-warning">
+            {% elif instance.status == 'SHUTOFF' %}
+                <span class="badge badge-default">
+            {% elif instance.status == 'ERROR' %}
+                <span class="badge badge-danger">
+            {% endif %}
+            {{ instance.status }}
+            </span>
+
+            {% if instance.status == 'ACTIVE' and current_user.role != 'student' %}
+                <small>{{ instance._info['OS-EXT-SRV-ATTR:hypervisor_hostname'] }}</small>
+            {% endif %}
+
+            {# Instance controls #}
+            <div class="btn-group pull-right" role="group">
+                    {% if instance.status == 'ACTIVE' %}
+                        <button class="btn btn-secondary instance-button"
+                                data-type="get_vnc"
+                                data-tooltip="tooltip"
+                                data-placement="top"
+                                title="Get VNC link">
+                            <i class="fa fa-play" aria-hidden="true"></i> Open Terminal
+                        </button>
+                    {% endif %}
+
+                {% if instance.is_owner %}
+                    {% if instance.status == 'SUSPENDED' %}
+                        <button class="btn btn-secondary instance-button text-success"
+                                data-type="resume"
+                                data-tooltip="tooltip"
+                                data-placement="top"
+                                title="Resume instance">
+                                <i class="fa fa-play" aria-hidden="true"></i>
+                            </button>
+                    {% elif instance.status == 'SHUTOFF' %}
+                        <button class="btn btn-secondary instance-button text-success"
+                                data-type="start"
+                                data-tooltip="tooltip"
+                                data-placement="top"
+                                title="Start instance">
+                                <i class="fa fa-play" aria-hidden="true"></i>
+                            </button>
+                    {% endif %}
+                {% endif %}
+
+                <button class="btn btn-danger"
+                        data-toggle="modal"
+                        data-target={{ "#delete-" + instance.id }}
+                                data-tooltip="tooltip"
+                        data-placement="top"
+                        title="Delete instance">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    </button>
+                </div>
+
+        </h4>
+
+        {# Status controls #}
+        {% if instance.status == 'ACTIVE' %}
+
+            <div class="btn-group" role="group">
+                <button class="btn btn-secondary instance-button"
+                        data-type="reboot"
+                        data-tooltip="tooltip"
+                        data-placement="top"
+                        title="Reboot instance">
+                    <i class="fa fa-repeat" aria-hidden="true"></i>
+                </button>
+                <button class="btn btn-secondary instance-button text-warning"
+                        data-type="suspend"
+                        data-tooltip="tooltip"
+                        data-placement="top"
+                        title="Suspend instance">
+                    <i class="fa fa-pause" aria-hidden="true"></i>
+                </button>
+                <button class="btn btn-secondary instance-button text-danger"
+                        data-type="shutdown"
+                        data-tooltip="tooltip"
+                        data-placement="top"
+                        title="Shutdown instance">
+                    <i class="fa fa-stop" aria-hidden="true"></i>
+                </button>
+                <button class="btn btn-secondary disabled default-cursor"
+                        data-tooltip="tooltip"
+                        data-placement="top"
+                        title="IP address">
+                    <i class="fa fa-globe" aria-hidden="true"></i> {{ instance.ip }}
+                </button>
+                <button class="btn btn-secondary disabled default-cursor"
+                        data-tooltip="tooltip"
+                        data-placement="top"
+                        title="Username">
+                    <i class="fa fa-user" aria-hidden="true"></i> {{ username }}
+                </button>
+                <button class="btn btn-secondary disabled default-cursor"
+                        data-tooltip="tooltip"
+                        data-placement="top"
+                        title="Password">
+                    <i class="fa fa-key" aria-hidden="true"></i> {{ password }}
+                </button>
+            </div>
+
+        {% endif %}
+    </div>
+</div>
+
+{# Delete instance confirm modal #}
+{% call modals.render_danger_modal("delete-" + instance.id, "Warning", "exclamation-triangle") %}
+    <p>Are you sure you want to delete this instance?</p>
+    <form action="{{ url_for('api.instance_delete') }}" method="post">
+        <input type="hidden" name="lab_id" value="{{ instance.tenant_id }}">
+        <input type="hidden" name="instance_id" value="{{ instance.id }}">
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-danger delete-instance">
+                <i class="fa fa-check" aria-hidden="true"></i> Confirm
+            </button>
+        </div>
+    </form>
+{% endcall %}
+
+<script>
+    // Fix for tooltips
+    $('[data-tooltip="tooltip"]').tooltip();
+</script>

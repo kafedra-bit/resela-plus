@@ -1,0 +1,51 @@
+{% macro render_modal(id, title, icon) %}
+    <div class="modal fade" id="{{ id }}">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {% if icon %}
+                            <i class="fa fa-{{ icon }}" aria-hidden="true"></i>
+                        {% endif %}
+                        {{ title }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-modal"
+                             role="progressbar"
+                             aria-valuenow="0"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                <div class="modal-body">
+                    {{ caller() }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro render_danger_modal(id, title, icon) %}
+    <div class="modal fade" id="{{ id }}">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header modal_warning">
+                    <h5 class="modal-title">
+                        {% if icon %}
+                            <i class="fa fa-{{ icon }}" aria-hidden="true"></i>
+                        {% endif %}
+                        {{ title }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {{ caller() }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endmacro %}

@@ -1,0 +1,110 @@
+{% extends "layout.html" %}
+
+{% block stylesheets %}
+    <style>
+        body {
+            background: url({{ url_for('static', filename='images/background.jpg') }}) center center no-repeat fixed;
+            background-size: cover;
+            padding: 0;
+            margin: 0;
+        }
+
+        .row {
+            width: 100%;
+            display: flex !important;
+        }
+
+        form {
+            background: #fff;
+            padding: 2em;
+            box-shadow: 2px 2px 15px -5px;
+        }
+
+        form h1 {
+            margin-bottom: 1em;
+        }
+
+        .logo {
+            margin-top: -10em;
+            margin-bottom: 5em;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+
+{% endblock %}
+
+{% block body %}
+
+    <div class="container vertical-center no-padding">
+        <div class="row justify-content-center">
+            <img src="{{ url_for('static', filename='images/resela_logo_transp.png') }}" class="hidden-md-down logo"/>
+            <div class="col-lg-4 col-md-6 col-sm-8 col-xs-12">
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-danger">
+                                {{ message }}
+                                <button type="button" class="close" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                {% if next %}
+                    <form action="{{ url_for('account.login') }}?next={{ next }}" class="form rounded text-center"
+                          method="post">
+                {% else %}
+                    <form action="{{ url_for('account.login') }}" class="form rounded text-center" method="post">
+                {% endif %}
+                <h1>Login</h1>
+                <div class="form-group">
+                    <div class="input-group">
+                                    <span class="input-group-addon" id="username-icon">
+                                        <i class="fa fa-user" aria-hidden="true"></i>
+                                    </span>
+                        <input
+                                id="username"
+                                type="text"
+                                class="form-control"
+                                name="username"
+                                placeholder="Username"
+                                aria-describedby="username-icon"
+                                required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                                    <span class="input-group-addon" id="password-icon">
+                                        <i class="fa fa-key" aria-hidden="true"></i>
+                                    </span>
+                        <input
+                                id="password"
+                                type="password"
+                                class="form-control"
+                                name="password"
+                                placeholder="Password"
+                                aria-describedby="password-icon"
+                                required>
+                    </div>
+                </div>
+                {% if show_captcha %}
+                    <div class="g-recaptcha" style="transform: scale(0.93); transform-origin: 0 0;"
+                         data-sitekey="6Ldarx0UAAAAAEZlnLZAmqnUQ8dgBGh5yd0iJGpc"></div>
+                {% endif %}
+                <button type="submit" class="btn btn-primary btn-block">Login</button>
+                <hr>
+                <a href="{{ url_for('account.forgot_password') }}" id="reset_password">Reset
+                    password</a>
+                </form>
+                <p class="text-white text-center">&copy; Resela+ 2017 | Version 3.0</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}{% endblock %}

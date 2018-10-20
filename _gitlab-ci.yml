@@ -1,0 +1,62 @@
+image: resela
+
+stages:
+    - test
+    - post-test
+    - deploy
+
+before_script:
+    - apt-get update
+
+variables:
+    MYSQL_HOST: "mysql"
+    MYSQL_USER: "resela"
+    MYSQL_PORT: "3306"
+    MYSQL_PASSWORD: "password"
+    MYSQL_DATABASE: "resela"
+    MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/pip-cache"
+
+cache:
+    paths:
+        - "$CI_PROJECT_DIR/pip-cache"
+    key: "$CI_PROJECT_ID"
+
+test:
+    stage: test
+    services:
+        - mysql:5.7
+    script:
+        - ./install/setupResela.sh -t
+        - pip3 install nose2 cov-core
+        - nose2 --verbose
+
+security:
+    stage: test
+    script:
+        - pip3 install bandit
+        - bandit -r resela || true # This should be enabled when the errors are resolved
+
+pylint:
+    stage: post-test
+    script:
+        - pip3 install pylint
+        - pylint --rcfile=pylint.rc resela || true # This should be enabled when the errors are resolved
+
+jslint:
+    stage: post-test
+    script:
+        - jslint resela/static/js/script.js
+
+pages:
+    stage: deploy
+    script:
+        - ./install/setupResela.sh -i
+        - make -C docs buildapi html
+        - mkdir public
+        - cp -r docs/build/html/* public/
+    artifacts:
+        paths:
+            - public
+    only:
+        - master

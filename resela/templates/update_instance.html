@@ -1,0 +1,61 @@
+{% if instance %}
+    <div hidden class="id">{{ instance.id }}</div>
+            <div class="lab_container instance_container">
+                <div hidden class="id">{{ instance.id }}</div>
+                <h3>Instance name
+                    {% if instance.status == 'ACTIVE' %}
+                        <small style="color:limegreen">{{ instance.status }}<br></small>
+                    {% elif instance.status == 'SUSPENDED' %}
+                        <small style="color:darkorange">{{ instance.status }}<br></small>
+                    {% else %}
+                        <small style="color:red">{{ instance.status }}<br></small>
+                    {% endif %}
+                 {% with instance_status = instance.status %}
+                    {% if instance_status == 'ACTIVE' %}
+                        <div class="btn-group pull-right" role="group">
+                            <button class="btn btn-secondary instance_vnc">
+                                Start VNC
+                            </button>
+                            <button class="btn btn-secondary instance_reboot">
+                                Reboot
+                            </button>
+                            <button class="btn btn-secondary instance_suspend">
+                                Suspend
+                            </button>
+                            <button class="btn btn-secondary instance_shutdown">
+                                Shutdown
+                            </button>
+                            <button class="btn btn-danger instance_delete"
+                                    data-toggle="modal"
+                                    data-target="#delete-instance-from-lab"
+                                    data-instance-to-delete="{{ instance.id }}">
+                                <i class="fa fa-ban" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    {% elif instance_status == 'SUSPENDED' %}
+                        <div class="btn-group pull-right" role="group">
+                            <button class="btn btn-secondary instance_resume">Resume</button>
+                            <button class="btn btn-danger instance_delete"><i class="fa fa-ban" aria-hidden="true"></i></button>
+                        </div>
+                    {% elif instance_status == 'SHUTOFF' %}
+                        <div class="btn-group pull-right" role="group">
+                            <button class="btn btn-secondary instance_start">Start</button>
+                            <button class="btn btn-danger instance_delete"><i class="fa fa-ban" aria-hidden="true"></i></button>
+                        </div>
+                    {% elif instance_status == 'ERROR' %}
+                        <div class="btn-group pull-right" role="group">
+                            <button class="btn btn-danger instance_delete"><i class="fa fa-ban" aria-hidden="true"></i></button>
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                </h3>
+                <strong>Course:</strong>{{ instance.name.split('|',1)[0] }}
+                <strong>Lab:</strong>{{ instance.name.split('|',2)[1] }}<br>
+                <strong>IP:</strong> {{ instance.ip }}
+                <strong>Created:</strong> {{ instance.created }}
+            </div>
+            <br>
+        <br>
+{% else %}
+
+{% endif %}

@@ -1,0 +1,94 @@
+{% extends "layout.html" %}
+{% block javascripts %}
+    <script src="{{ url_for('static', filename='js/dynamic_form.js') }}"></script>
+    <script>
+        // Course collapse labs
+        $('.course-name').click(function () {
+            var wrapper = $(this).siblings('.instance-wrapper');
+            // Toggle the instances
+            wrapper.slideToggle();
+            // Load the instances
+            wrapper.children('.instance-box').each(function () {
+                if ($(this).data('loaded') != true) {
+                    $(this).load($(this).data('url'));
+                    $(this).data('loaded', true);
+                }
+            });
+        });
+    </script>
+
+{% endblock %}
+{% block stylesheets %}
+    <style>
+        .list-group-item {
+            padding: 0;
+        }
+
+        .course-name {
+            padding: 1em;
+            margin: 0;
+        }
+
+        .course-name:hover {
+            cursor: pointer;
+            background-color: rgba(0,0,0,0.01);
+        }
+
+        .instance-wrapper {
+            display: none;
+            padding: 1em;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            background: rgba(0, 0, 0, 0.01);
+        }
+    </style>
+{% endblock %}
+{% block content %}
+
+    <div class="row">
+        <div class="col">
+            <h1>Active Virtual machines</h1>
+            <hr>
+        </div>
+    </div>
+
+    {% for course in courses %}
+        {% for lab in course.labs %}
+            {% if lab.instances|length > 0 %}
+                <li class="row list-group-item">
+                    <div class="row">
+                        <div class="col">
+                            {% with lab_name = lab.name.split('|')[1] %}
+                                <h3 class="course-name">
+                                    {{ course.name }}
+                                    <small>{{ lab_name }}</small>
+                                    {% if lab.qty_active > 0 %}
+                                        <span class="badge badge-pill pull-right badge-success"
+                                              data-toggle="tooltip" title="Number of active VMs">
+                                            {{ lab.qty_active }}
+                                        </span>
+                                    {% endif %}
+                                    {% if lab.qty_error > 0 %}
+                                        <span class="badge badge-pill pull-right badge-danger"
+                                              data-toggle="tooltip" title="Number of VMs with error">
+                                            {{ lab.qty_error }}
+                                        </span>
+                                    {% endif %}
+                                </h3>
+                            {% endwith %}
+                            <div class="instance-wrapper">
+                            {% for instance in lab.instances %}
+                                <div class="instance-box"
+                                     data-id="{{ instance.id }}"
+                                     data-lab-id="{{ lab.id }}"
+                                     data-url="{{ url_for('api.instance_box', instance_id=instance.id) }}">
+                                    Loading...
+                                </div>
+                            {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+{% endblock %}

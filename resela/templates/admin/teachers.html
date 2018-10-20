@@ -1,0 +1,104 @@
+{% extends "layout.html" %}
+{% import "macros/modals.html" as modals %}
+{% block javascripts %}
+    <script src="{{ url_for('static', filename='js/dynamic_form.js') }}"></script>
+    <script>
+        $('#delete-teacher-from-resela').on('show.bs.modal', function (event) {
+            $('#teacher_user_id').val($(event.relatedTarget).data('teacher-id'))
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <h1>Teachers
+        </h1>
+        <div class="row">
+            <div class="col">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>
+                            <button id="add_user" class="btn btn-secondary pull-right"
+                                    data-toggle="modal" data-target="#add-teacher-modal"
+                                    data-tooltip="tooltip" data-placement="top"
+                                    title="Add user to ReSeLa+">
+                                <i class="fa fa-plus" aria-hidden="true"></i> Create teacher
+                            </button>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for teacher in teachers %}
+                        <tr>
+                            <td>{{ teacher.first_name }} {{ teacher.last_name }}</td>
+                            <td>{{ teacher.email }}</td>
+                            <td class="text-right">
+                                <div class="btn-group" role="group" aria-label="Lab options">
+                                    <a href="{{ url_for('edit.user', user_id = teacher.id) }}">
+                                        <button class="btn btn-secondary primary"
+                                                data-toggle="tooltip"
+                                                data-placement="top"
+                                                title="Show teacher">
+                                            <i class="fa fa-eye" aria-hidden="true"></i>
+                                        </button>
+                                    </a>
+                                    <button class="btn btn-secondary danger" data-toggle="modal"
+                                            data-teacher-id="{{ teacher.id }}"
+                                            data-target="#delete-teacher-from-resela"
+                                            data-tooltip="tooltip"
+                                            data-placement="top"
+                                            title="Remove teacher from ReSeLa">
+                                        <i class="fa fa-ban" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% call modals.render_danger_modal("delete-teacher-from-resela", "Warning",
+"exclamation-triangle") %}
+        <p>Are you sure you want to delete this user from ReSeLa?</p>
+        <form action="{{ url_for('api.user_delete') }}" method="post">
+            <input type="hidden" id="teacher_user_id" name="user_id" value="">
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fa fa-check" aria-hidden="true"></i> Confirm
+                </button>
+            </div>
+        </form>
+    {% endcall %}
+
+
+    {% call modals.render_modal("add-teacher-modal", "Create teacher account") %}
+        <p>
+            Enter the users email address, first name, surname.
+            Several users can be added separate each user by a semicolon.
+            <br>
+            Example:
+        </p>
+        <p class="text-muted">
+            teacher1@example.com,Teacher1,Teachersson1;
+            teacher2@example.com,Teacher2,Teachersson2
+        </p>
+        <form action="{{ url_for('api.database_add_user') }}" method="post">
+            <input type="hidden" name="role" value="teacher">
+            <div class="form-group">
+                <textarea class="form-control" name="users"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fa fa-check" aria-hidden="true"></i> Confirm
+            </button>
+        </form>
+    {% endcall %}
+{% endblock %}
+

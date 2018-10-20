@@ -1,0 +1,17 @@
+python-openstackclient
+python-neutronclient
+flask
+flask-ini
+flask-login
+flask_mail
+flask_sqlalchemy
+isoweek
+paramiko
+mysql-connector==2.1.4
+pymysql
+sphinx
+sphinx_rtd_theme
+nose2
+cov-core
+pylint
+pyopenssl

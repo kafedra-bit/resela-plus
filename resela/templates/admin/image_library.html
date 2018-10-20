@@ -1,0 +1,496 @@
+{% extends "layout.html" %}
+{% import "macros/modals.html" as modals %}
+
+{% block javascripts %}
+    <script src="{{ url_for('static', filename='js/dynamic_form.js') }}"></script>
+    <script>
+        $(function () {
+
+            $('.delete-image').click(function () {
+                var e = $(this);
+                if (confirm("Do you want to delete this image?")) {
+                    var u = '{{ url_for('api.library_remove_image') }}';
+                    var d = {'image_id': $(e).data('image-id')};
+                    $.post(u, d, function () {
+                        $('.collapse').collapse('hide');
+                        $(e).parents('.image-list-item').hide(200);
+                    });
+                }
+            });
+
+            $('.assign-image').click(function () {
+                var e = $(this);
+                var u = '{{ url_for('api.library_add_image') }}';
+                var d = {
+                    'image_id': $(e).data('image-id'),
+                    'lab_id': $(e).parent().find('.lab-select').val()
+                };
+
+                $.post(u, d, function (data) {
+                        if (data.success)
+                            window.location.href = data.redirect;
+                        else {
+                            /* TODO: Return some error */
+                        }
+                    }
+                );
+            });
+
+            $('.download-image').click(function () {
+                var e = $(this);
+                var u = e.data('url');
+                var win = window.open(u, '_blank');
+                win.focus();
+            });
+
+            $('#search-button-execute').click(function () {
+
+                // Collapse list-items
+                $('.collapse').collapse('hide');
+
+                var u = "{{ url_for('api.search_for_images') }}";
+                var d = {
+                    'keywords': $('#search-keywords').val(),
+                    'internet': $('#search-internet').val(),
+                    'os': $('#search-os').val(),
+                    'version': $('#search-version').val(),
+                    'flavor': $('#search-flavor').val(),
+                    'library': $('#search-library').val()
+                };
+
+                $.post(u, d, function (data) {
+                    if (data.success) {
+                        $('.image-list-item').each(function () {
+                            if (data.images.indexOf($(this).attr('id')) == -1)
+                                $(this).hide();
+                            else
+                                $(this).show();
+                        });
+                    }
+                });
+            });
+
+            $('.os-dropdown').change(function () {
+                var current_dropdown = $(this);
+                var version_dropdown = current_dropdown.next();
+                version_dropdown.attr('disabled', false);
+                version_dropdown.empty();
+
+                if ($(this).val() !== '') {
+                    var url = "/api/version/" + $(this).val();
+
+                    $.get(url, function (data) {
+                        if (data.success) {
+                            if (data.version.length != 0) {
+                                if (current_dropdown.attr('id') == 'search-os') {
+                                    version_dropdown.append($('<option>', {
+                                        value: '',
+                                        text: 'All versions'
+                                    }));
+                                }
+                                for (var i = 0; i < data.version.length; i++) {
+                                    version_dropdown.append($('<option>', {
+                                        value: data.version[i],
+                                        text: data.version[i]
+                                    }));
+                                }
+                            }
+                            else
+                                version_dropdown.attr('disabled', true);
+                        }
+
+                    }, 'json');
+                }
+                else
+                    version_dropdown.attr('disabled', true);
+            });
+            $('.snapshot-factory-assign').click(function () {
+                var u = "/api/snapshot_factory/assign/" + $(this).data('img-id');
+                $.post(u, function (data) {
+                    if (data.success) {
+                        window.location.href = data.redirect;
+                    }
+                    else {
+                        alert(data.feedback);
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .form-inline {
+            width: auto !important;
+            display: inline-block;
+        }
+
+        .progress-bar {
+            display: none;
+        }
+
+        .progress {
+            margin-bottom: 1em;
+        }
+
+        .loading {
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.35);
+            color: white;
+            display: none;
+        }
+
+        .loading > div {
+            margin-top: 50%;
+        }
+
+        .image-list {
+            margin-top: 2em;
+        }
+
+        .image-list .image-header {
+            font-weight: bold;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .image-list-item {
+            padding: 0.5em 0;
+        }
+
+        .image-list-item .col-2, .image-list-item .col-1{
+            line-height: 2.5em;
+        }
+
+        .image-list-item:hover {
+            cursor: pointer;
+            /*background: rgba(0, 0, 0, 0.02);*/
+        }
+
+        .image-list-item-details {
+            padding: 1em;
+            background: rgba(0, 0, 0, 0.01);
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <h1>
+            Image library
+
+            <button type="button" class="btn btn-primary pull-right" data-toggle="modal"
+                    data-target="#modal-image-upload">
+                <i class="fa fa-cloud-upload" aria-hidden="true"></i> Upload new
+            </button>
+        </h1>
+        View and manage all images and snapshots available in ReSeLa or upload your
+        own!
+        <hr>
+    </div>
+
+    {# Search box #}
+    <div class="row">
+        <form data-spy="affix">
+            <h1>Search</h1>
+            You can use this search form to look for a specific image in the image library.
+            <div class="form-group">
+                <input placeholder="Keyword search" id="search-keywords" type="text"
+                       class="form-control"
+                       data-role="tagsinput"/>
+            </div>
+            <div class="collapse" id="advanced-search">
+                <div class="form-group form-inline">
+                    <select id="search-internet" class="form-control" name="internet">
+                        <option value="">Internet preference</option>
+                        <option value="True">With internet</option>
+                        <option value="False">Without internet</option>
+                    </select>
+                </div>
+                <div id="select-os-dropdown" class="form-group form-inline">
+                    <select id="search-os" name="os"
+                            class="os-dropdown search-dropdown form-control">
+                        <option value=''>Select OS</option>
+                        {% for i in os %}
+                            <option value="{{ i.id }}">{{ i.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <select id="search-version" name="version" disabled
+                            class="form-control version-dropdown search-dropdown">
+                    </select>
+                </div>
+                <br>
+                <div class="form-group form-inline">
+                    <select id="search-library" class="form-control" name="library">
+                        <option value="">No library selected</option>
+                        <option value="Default">Default</option>
+                        <option value="Snapshots">Snapshots</option>
+                        <option value="Images">Images</option>
+                    </select>
+                </div>
+                <div class="form-group form-inline">
+                    <select name="flavor" id="search-flavor" class="form-control">
+                        <option value="">No flavor selected</option>
+                        {% for flavor in flavors %}
+                            <option value="{{ flavor.name }}">
+                                {{ flavor.name.split('.')[1]|capitalize }}:
+                                RAM {{ flavor.ram }} MB,
+                                CPU {{ flavor.vcpus }},
+                                Disk {{ flavor.disk }} GB
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </form>
+
+        <button type="submit" class="btn btn-primary" id="search-button-execute">
+            <i class="fa fa-search" aria-hidden="true"></i> Search
+        </button>
+        <a href="#" data-toggle="collapse" data-target="#advanced-search"
+           aria-expanded="false" aria-controls="advanced-search">Advanced search</a>
+        <hr>
+    </div>
+
+    {# Image list #}
+    <div class="image-list">
+        <div class="image-header row flex-row">
+            <div class="col-2">Name</div>
+            <div class="col-1">Library</div>
+            <div class="col-2">OS</div>
+            <div class="col-2">Version</div>
+            <div class="col-1">Internet</div>
+            <div class="col-2">Size</div>
+        </div>
+        {% for image in images %}
+            <div class="image-list-item row flex-row" id="{{ image.id }}"
+                 data-toggle="collapse"
+                 data-target="#collapse-{{ image.id }}"
+                 aria-expanded="false"
+                 aria-controls="collapse-{{ image.id }}">
+
+                <div class="col-2">{{ image.name.split('|')[2]|capitalize|truncate(18) }}</div>
+                <div class="col-1">{{ image.name.split('|')[1]|capitalize }}</div>
+                <div class="col-2">{{ image.os|capitalize }}</div>
+                <div class="col-2">{{ image.version }}</div>
+                <div class="col-1">{{ image.internet }}</div>
+                <div class="col-2">{{ image.size|filesizeformat }}</div>
+                <div class="col-2">
+                    {% if current_user.role == 'admin' or image.name.split('|')[1]|capitalize
+                    != 'Default' %}
+                    <button type="button" data-image-id="{{ image.id }}"
+                            class="delete-image pull-right btn btn-danger">
+                        <i class="fa fa-trash-o" aria-hidden="true"></i> Delete
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# Image details #}
+            <div class="image-list-item-details collapse" id="collapse-{{ image.id }}">
+                <div class="row">
+                    <h6>
+                        Description
+
+                        <div class="button-group">
+                            <button class="btn btn-secondary download-image pull-right"
+                                    data-url="{{ url_for('api.download_image',image_id=image.id) }}">
+                                <i class="fa fa-cloud-download" aria-hidden="true"></i>
+                                Download
+                            </button>
+                            {% if current_user.role == 'teacher' %}
+                                <button class="btn btn-secondary snapshot-factory-assign pull-right"
+                                        data-img-id="{{ image.id }}">
+                                    <i class="fa fa-camera-retro" aria-hidden="true"></i>
+                                    Create snapshot
+                                </button>
+                            {% endif %}
+                        </div>
+                    </h6>
+                    {{ image.description }}<br><br>
+                    Username: {{ image.username }}<br>
+                    Password: {{ image.password}}
+                </div>
+
+                <div class="row">
+                    <h6>Keywords</h6>
+                    {{ image.keywords }}
+                </div>
+
+                {% if current_user.role == 'teacher' %}
+                    <div class="row">
+                        <h6>Assign Lab</h6>
+                        <select class="custom-select lab-select">
+                            {% if not course_w_labs %}
+                                <option value="">No labs available</option>
+                            {% endif %}
+                            {% for course in course_w_labs %}
+                                <optgroup label="{{ course|truncate(20) }}">
+                                    {% for lab in course_w_labs[course]['labs'] %}
+                                        <option value="{{ lab.id }}">
+                                            {{ lab.name.split('|')[1]|truncate(20) }}
+                                        </option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endfor %}
+                        </select>
+
+                        <button type="button" class="assign-image btn btn-success"
+                                data-image-id="{{ image.id }}">
+                            <i class="fa fa-plus" aria-hidden="true"></i> Add
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+
+    {# Upload image modal #}
+    <div class="modal fade" id="modal-image-upload">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="loading">
+                    <div class="d-block text-center">
+                        <h1>Preparing image</h1>
+                        <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+                    </div>
+                </div>
+                <div class="modal-header">
+                    <h5 class="modal-title">Add new image</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: 0%;"
+                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%
+                        </div>
+                    </div>
+                    <form action="{{ url_for('api.image_upload') }}"
+                          id="upload_form"
+                          method="post"
+                          enctype=multipart/form-data>
+
+                        <input type="hidden" name="id" value="{{ id }}" required>
+
+                        <div class="form-group">
+                            <input type="file" placeholder="File"
+                                   name="file" accept="{{ extensions }}" required>
+                        </div>
+
+                        <div class="form-group" id="image-name">
+                            <label for="image-name" class="col-form-label">
+                                <b>Enter the name for the image uploaded</b>
+                            </label>
+                            <input class="form-control" type="text" name="name" required>
+                        </div>
+
+                        <div class="form-group" id="keyword-select">
+                            <label for="keyword-select" class="col-form-label">
+                                <b>Enter keywords for your upload separated by comma (,)</b>
+                            </label>
+                            <input class="form-control" type="text" name="keywords"
+                                   data-role="tagsinput" required>
+                        </div>
+
+                        <div class="form-group" id="description-select">
+                            <label for="description-select" class="col-form-label">
+                                <b>Give a short description of the image</b>
+                            </label>
+                            <textarea class="form-control" rows="3" name="description"
+                                      required></textarea>
+                        </div>
+
+                        <div class="form-group" id="login-credential-select">
+                            <label for="login-credential-select" class="col-form-label">
+                                <b>Enter the login credentials for the image</b>
+                            </label>
+
+                            <div class="form-group" id="login-username">
+                                <input class="form-control" type="text"
+                                       name="username" placeholder="Login username">
+                            </div>
+                            <div class="form-group" id="login-password">
+                                <input class="form-control" type="text"
+                                       name="password" placeholder="Login password">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-inline" id="os-version-select">
+                            <label for="os-version-select" class="col-form-label text-left">
+                                <b>Select OS and version</b>
+                            </label>
+                            <select name="image_os" class="os-dropdown upload-select form-control">
+                                <option value="">Select OS</option>
+                                {% for i in os %}
+                                    <option value="{{ i.id }}">{{ i.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <select name="image_version" disabled
+                                    class="version-dropdown upload-version form-control"></select>
+                        </div>
+
+
+                        <div class="form-group" id="internet-select">
+                            <b>Internet</b><br>
+                            <label class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input"
+                                       value="True" name="internet">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">Has internet</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group" id="flavor-select">
+                            <label for="flavor-select" class="col-form-label">
+                                <b>Select flavor</b>
+                            </label>
+                            <select class="form-control" name="flavor">
+                                {% for flavor in flavors %}
+                                    <option value="{{ flavor.name }}">
+                                        {{ flavor.name.split('.')[1]|capitalize }}:
+                                        RAM {{ flavor.ram }} MB,
+                                        CPU {{ flavor.vcpus }},
+                                        Disk {{ flavor.disk }} GB
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="library-select">
+                            <label for="library-select" class="col-form-label">
+                                <b>Select library</b>
+                            </label>
+                            <select class="form-control" name="image_type">
+                                {% if current_user.role in ('admin') %}
+                                <option value="Default">Default</option>
+                                {% endif %}
+                                <option value="Snapshot">Snapshot</option>
+                                <option value="Image">Image</option>
+                            </select>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-cloud-upload" aria-hidden="true"></i> Upload
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                <i class="fa fa-ban" aria-hidden="true"></i> Close
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+

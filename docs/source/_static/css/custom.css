@@ -1,0 +1,7 @@
+.rst-content .highlight>pre {
+    line-height: 1.5;
+}
+.wy-side-nav-search {
+    background-color: #292929;
+    border-bottom: 1px solid black;
+}

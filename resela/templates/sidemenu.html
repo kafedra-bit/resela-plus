@@ -1,0 +1,63 @@
+<div class="sidebar">
+    {% if current_user.role == 'admin' %}
+
+        <h3>Admin</h3>
+        <hr>
+
+        <a href="{{ url_for('default.index') }}">
+            <i class="fa fa-tachometer" aria-hidden="true"></i> Overview</a>
+
+        <a href="{{ url_for('default.courses') }}">
+            <i class="fa fa-graduation-cap" aria-hidden="true"></i> Courses</a>
+
+        <a href="{{ url_for('admin.students') }}">
+            <i class="fa fa-user" aria-hidden="true"></i> Students</a>
+
+        <a href="{{ url_for('admin.teachers') }}">
+            <i class="fa fa-user" aria-hidden="true"></i> Teachers</a>
+
+        <a href="{{ url_for('default.active_vm') }}">
+            <i class="fa fa-server" aria-hidden="true"></i> Active VMs</a>
+
+        <a href="{{ url_for('admin.image_library') }}">
+            <i class="fa fa-book" aria-hidden="true"></i> Image library</a>
+
+    {% elif current_user.role == 'teacher' %}
+
+        <h3>Teacher</h3>
+        <hr>
+
+        <a href="{{ url_for('default.index') }}">
+            <i class="fa fa-tachometer" aria-hidden="true"></i> Overview</a>
+
+        <a href="{{ url_for('default.courses') }}">
+            <i class="fa fa-graduation-cap" aria-hidden="true"></i> Courses</a>
+
+        <a href="{{ url_for('admin.students') }}">
+            <i class="fa fa-user" aria-hidden="true"></i> Students</a>
+
+        <a href="{{ url_for('default.active_vm') }}">
+            <i class="fa fa-server" aria-hidden="true"></i> Running VMS</a>
+
+        <a href="{{ url_for('admin.image_library') }}">
+            <i class="fa fa-book" aria-hidden="true"></i> Image library</a>
+
+        <a href="{{ url_for('default.snapshot_factory') }}">
+            <i class="fa fa-camera-retro" aria-hidden="true"></i> Snapshot factory</a>
+
+    {% elif current_user.role == 'student' %}
+
+        <h3>Student</h3>
+        <hr>
+
+        <a href="{{ url_for('default.index') }}">
+            <i class="fa fa-tachometer" aria-hidden="true"></i> Overview</a>
+
+        <a href="{{ url_for('default.courses') }}">
+            <i class="fa fa-graduation-cap" aria-hidden="true"></i> Courses</a>
+
+        <a href="{{ url_for('default.active_vm') }}">
+            <i class="fa fa-server" aria-hidden="true"></i> Running VMS</a>
+
+    {% endif %}
+</div>
