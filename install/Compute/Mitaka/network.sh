@@ -32,7 +32,7 @@ auto ${manInt}
 iface ${manInt} inet static
 address ${nodeIP}/24
 gateway ${gatewayIP}
-dns-nameservers 8.8.8.8
+dns-nameservers 192.168.212.2 192.168.0.1
 
 # The provider network interface
 auto ${provInt}

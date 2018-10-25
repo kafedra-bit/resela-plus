@@ -195,7 +195,7 @@ class NetworkHandler:
         try:
             # TODO(jiah): Don't hardcode google dns
             new_subnet_dict = {'network_id': network_id, 'name': subnet_name, 'ip_version': 4,
-                               'cidr': cidr, 'dns_nameservers': ["8.8.8.8", "8.8.4.4"]}
+                               'cidr': cidr, 'dns_nameservers': ["192.168.212.2", "192.168.0.1"]}
             new_subnet = self.neutron_client.create_subnet({'subnet': new_subnet_dict})
 
         except netclient.exceptions.OverQuotaClient:
