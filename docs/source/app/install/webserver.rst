@@ -20,18 +20,18 @@ MySQL.
 
 Downloading ReSeLa+
 ~~~~~~~~~~~~~~~~~~~
-To download ReSeLa+ either visit our https://gitlab.resela.eu/resela/resela and download the
+To download ReSeLa+ either visit our https://github.com/kafedra-bit/resela-plus and download the
 zipfile or download the repository directly with git
 
 .. code-block:: sh
 
-    $ git clone -b production https://gitlab.resela.eu/resela/resela.git
+    $ git clone -b production https://github.com/kafedra-bit/resela-plus.git
 
 To download the latest (unstable) version use
 
 .. code-block:: sh
 
-    $ git clone https://gitlab.resela.eu/resela/resela.git
+    $ git clone https://github.com/kafedra-bit/resela-plus.git
 
 
 MySQL setup
@@ -112,10 +112,10 @@ Modify the following parameters to match your environment
     pass = <DATABASE_PASSWORD>
 
     [resela]
-    domain = http://resela.eu
+    domain = http://lviv.resela.eu
 
     [pru]
-    user = no-reply@resela.eu
+    user = no-reply@lviv.resela.eu
     pass = <PRU_PASSWORD>
 
     [captcha]
@@ -226,7 +226,7 @@ Next you should modify the ReSeLa+ configuration with following settings
     session_cookie_secure = on
 
     [resela]
-    domain = https://resela.eu
+    domain = https://lviv.resela.eu
 
 Next restart apache2 to enable https
 
@@ -269,7 +269,7 @@ Next we need to download the ReSeLa+ repository into our web directory.
 .. code-block:: sh
 
     $ cd /var/www
-    $ git clone http://gitlab.resela.eu/resela/resela.git
+    $ git clone http://github.com/kafedra-bit/resela-plus.git
     $ cd resela
 
 Next we run the installation script located in the `install` folder.
@@ -302,10 +302,10 @@ config file. Modify the following parameters to match your environment
     pass = <PWD>
 
     [resela]
-    domain = http://resela.eu
+    domain = http://lviv.resela.eu
 
     [pru]
-    user = no-reply@resela.eu
+    user = no-reply@lviv.resela.eu
     pass = <PWD>
 
     [captcha]
@@ -340,7 +340,7 @@ Next you should modify the ReSeLa+ configuration with following settings
     session_cookie_secure = on
 
     [resela]
-    domain = https://resela.eu
+    domain = https://lviv.resela.eu
 
 Initialize database
 ~~~~~~~~~~~~~~~~~~~

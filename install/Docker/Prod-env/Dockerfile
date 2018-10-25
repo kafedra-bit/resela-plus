@@ -4,7 +4,7 @@ ADD apt_requirements.txt /tmp/
 ADD application.ini /root/
 ADD Docker/init_container.sh /root/
 
-ENV WEBHOST 'resela.eu'
+ENV WEBHOST 'lviv.resela.eu'
 ENV CONTROLLER_IP '10.0.2.11'
 ENV MIKROTIK_IP '10.0.2.1'
 ENV BRANCH 'production'

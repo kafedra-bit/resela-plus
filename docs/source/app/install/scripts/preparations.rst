@@ -9,20 +9,20 @@ The whole folder should be downloaded to each machine that are going to be used.
 
 Downloading ReSeLa+
 ~~~~~~~~~~~~~~~~~~~
-To download ReSeLa+ either visit our `gitlab:` http://gitlab.resela.eu/resela/ and download the
+To download ReSeLa+ either visit our `gitlab:` http://github.com/kafedra-bit/ and download the
 zipfile or download the
 repository
 directly with git
 
 .. code-block:: sh
 
-    $ git clone -b production http://gitlab.resela.eu/resela/resela.git
+    $ git clone -b production http://github.com/kafedra-bit/resela-plus.git
 
 To download the latest (unstable) version use
 
 .. code-block:: sh
 
-    $ git clone http://gitlab.resela.eu/resela/resela.git
+    $ git clone http://github.com/kafedra-bit/resela-plus.git
 
 
 **Relevant scripts**

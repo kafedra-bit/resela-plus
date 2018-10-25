@@ -209,9 +209,9 @@ if [[ ${hasApache} == 'true' ]]; then
     echo -e "${GREEN}Creating apache configuration${NC}"
 
     if [ "${TESTMODE}" == 'false' ]; then
-        [[ -z "${WEBHOST}" ]] && read -e -i "resela.eu" -p "Webserver hostname: " hostname || hostname="${WEBHOST}"
+        [[ -z "${WEBHOST}" ]] && read -e -i "lviv.resela.eu" -p "Webserver hostname: " hostname || hostname="${WEBHOST}"
     else
-        WEBHOST='resela.eu'
+        WEBHOST='lviv.resela.eu'
     fi
 
     cat > "/etc/apache2/sites-available/resela.conf" << END_OF_CONFIG
