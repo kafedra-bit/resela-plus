@@ -1,4 +1,4 @@
-#!/usr/bin/env bash -ex
+#!/bin/bash -ex
 
 # Author Fredrik Johansson, Annika Hansson
 # Openstack version Mitaka
