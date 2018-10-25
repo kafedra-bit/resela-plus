@@ -24,7 +24,7 @@ RUN pip3 install --upgrade pip
 RUN pip3 install -r /tmp/requirements.txt
 
 WORKDIR /var/www
-RUN git clone -b $BRANCH https://github.com/kafedra-bit/resela-plus.git
+RUN git clone -b $BRANCH https://github.com/kafedra-bit/resela-plus.git resela
 RUN cp /root/application.ini resela/resela/config/application.ini
 RUN resela/install/setupResela.sh
 
