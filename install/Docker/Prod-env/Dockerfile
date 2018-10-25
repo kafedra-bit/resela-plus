@@ -7,7 +7,7 @@ ADD Docker/init_container.sh /root/
 ENV WEBHOST 'lviv.resela.eu'
 ENV CONTROLLER_IP '10.0.2.11'
 ENV MIKROTIK_IP '10.0.2.1'
-ENV BRANCH 'production'
+ENV BRANCH 'test'
 
 RUN sed -i -E "s/<CIP>/$CONTROLLER_IP/" /root/init_container.sh
 RUN sed -i -E "s/<MIP>/$MIKROTIK_IP/" /root/init_container.sh
