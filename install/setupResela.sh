@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/usr/bin/env bash
 #
 # Resela web application setup script
 #
@@ -111,7 +111,10 @@ if [ ! -f "${RESELACONFIG}" ]; then
 fi
 
 # Check if controller domain exists else configure
-if ! grep -q -E '^[[:blank:]]*([0-9]{1,3}\.){3}[0-9]{1,3}[[:blank:]]+controller' /etc/hosts; then
+if grep -q -E '^[[:blank:]]*([0-9]{1,3}\.){3}[0-9]{1,3}[[:blank:]]+controller' /etc/hosts ; then
+   echo "OK";
+else
+    echo "$(cat /etc/hosts)";
     addHostController='false'
 
     # Do not prompt in testmode
