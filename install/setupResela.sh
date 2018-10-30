@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/usr/bin/env bash
 #
 # Resela web application setup script
 #
